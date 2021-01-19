@@ -12,6 +12,8 @@ version 3 (GPLv3).
 Environment variables (optional)
 --------------------------------
 
+::
+
     CODESPEED_URL : Codespeed url to send bencharks to. Defaults to  http://localhost:8000
     CODESPEED_ENV = Codespeed environment. Defaults to unknown
     CODESPEED_PROJECT = Codespeed project. Defaults to unknown
