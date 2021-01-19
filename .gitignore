@@ -1,0 +1,13 @@
+### Python binaries
+*.pyc
+*.pyo
+
+### IDE files
+.idea
+
+
+### pip package files
+*.egg-info
+
+dist/*
+
