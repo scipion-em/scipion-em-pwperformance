@@ -3,11 +3,6 @@ import tkinter as tk
 import unittest
 
 import pyworkflow.gui as pwgui
-from scipion.__main__ import main
-
-# Initialize scipion environment
-main(justinit=True)
-
 import pyworkflow as pw
 import pyworkflow.project as pwobj
 from pwperformance.main import Timer, Benchmark, codespeed
