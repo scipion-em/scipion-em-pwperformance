@@ -42,8 +42,6 @@ class TestProfilingLoadGUI(unittest.TestCase):
         return runsGraph
 
     def findProjects(self):
-        import time
-        time.sleep(10)
         self.projectsPath = os.environ.get("PROFILING_PROJECTS_PATH", "/home/yunior/profilingProjects/")
 
         if self.projectsPath is not None:
