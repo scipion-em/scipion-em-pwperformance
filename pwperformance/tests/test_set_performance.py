@@ -21,17 +21,17 @@ class TestSetPerformanceSteps(unittest.TestCase):
         cls.mic1 = cls.dataset.getFile('mic1')
         cls.particlesStk = os.path.join(cls.dataset.getPath(), 'particles', 'BPV_1386.stk')
 
+    def basiccoordsFactory(self, iteration):
+        # newCoord =  Coordinate(x=i, y=i)
+        # To avoid dict get
+        newCoord = Coordinate()
+        newCoord.setX(iteration)
+        newCoord.setY(iteration)
+        return newCoord
+
     def testBasicCoordinatesSet(self):
 
-        def coordsFactory(iteration):
-            # newCoord =  Coordinate(x=i, y=i)
-            # To avoid dict get
-            newCoord = Coordinate()
-            newCoord.setX(iteration)
-            newCoord.setY(iteration)
-            return newCoord
-
-        measureSetPerformance(SetOfCoordinates, coordsFactory, "basic-coords")
+        measureSetPerformance(SetOfCoordinates, self.basiccoordsFactory, "basic-coords")
 
     def testExtendedCoordinatesSet(self):
 
@@ -119,6 +119,20 @@ class TestSetPerformanceSteps(unittest.TestCase):
 
         measureSetPerformance(SetOfParticles, particlesFactory, "complex particles")
 
+    def testUsingGet(self):
+        """ This benchmarks the time accessing an item as a dictionary, like set[id]."""
+        items = 100
+        soc = createSet(SetOfCoordinates)
+        createItems(soc, self.basiccoordsFactory, numberofitems=items)
+        t = Timer("A %s Set.__item__ calls" % items)
+        t.tic()
+        for id in range(1,items+1):
+            soc[id]
+        t.toc()
+        bm = Benchmark(time=t.getElapsedTime().total_seconds(),
+                       name="A %s Set.__item__ calls" % items)
+
+        codespeed.sendData(bm)
 
 def measureSetPerformance(setClass, itemFactory, performanceTag, numberofitems=100000):
     """ Measures instantiation, persistence and iteration of a set, sending data to a codespeed benchmark server"""
@@ -152,17 +166,19 @@ def createItems(set, itemfactory, numberofitems=100000, performanceTag=None):
 
     set.write()
 
-    bm = Benchmark(time=creation.total_seconds(),
-                   name="Instantiation of %s %s" % (numberofitems, performanceTag))
+    if performanceTag:
 
-    codespeed.sendData(bm)
+        bm = Benchmark(time=creation.total_seconds(),
+                       name="Instantiation of %s %s" % (numberofitems, performanceTag))
 
-    bm = Benchmark(time=append.total_seconds(),
-                   name="Persistence of %s %s" % (numberofitems, performanceTag))
+        codespeed.sendData(bm)
 
-    codespeed.sendData(bm)
+        bm = Benchmark(time=append.total_seconds(),
+                       name="Persistence of %s %s" % (numberofitems, performanceTag))
 
-    measureSetIteration(set, "coords")
+        codespeed.sendData(bm)
+
+        measureSetIteration(set, performanceTag)
 
 def createSet(setClass):
     """ Create a set based on the setClass in the system temporary folder"""
