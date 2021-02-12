@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 from pwperformance.main import Timer, Benchmark, BENCHMARK, codespeed
-from pwem.objects import SetOfCoordinates, Coordinate, SetOfParticles, Integer, Particle, Acquisition, Micrograph
+from pwem.objects import SetOfCoordinates, Coordinate, SetOfParticles, Integer, Particle, Acquisition, Micrograph, Movie
 import os
 from  datetime import timedelta
 
@@ -18,8 +18,11 @@ class TestSetPerformanceSteps(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.dataset = DataSet.getDataSet('xmipp_tutorial')
+        cls.moviewset = DataSet.getDataSet('jmbFalconMovies')
+
         cls.mic1 = cls.dataset.getFile('mic1')
         cls.particlesStk = os.path.join(cls.dataset.getPath(), 'particles', 'BPV_1386.stk')
+        cls.movieFn = cls.moviewset.getFile("movie1")
 
     def basiccoordsFactory(self, iteration):
         # newCoord =  Coordinate(x=i, y=i)
@@ -98,6 +101,15 @@ class TestSetPerformanceSteps(unittest.TestCase):
             return newMic
 
         measureSetPerformance(SetOfParticles, micsFactory, "basic mics")
+
+
+    def testBasicMoviesSetPerformance(self):
+
+        def moviesFactory(index):
+            newMovie = Movie(location=self.movieFn)
+            return newMovie
+
+        measureSetPerformance(SetOfParticles, moviesFactory, "basic movies")
 
 
     def testBasicParticlesSetPerformance(self):

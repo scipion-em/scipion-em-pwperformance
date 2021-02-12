@@ -1,7 +1,7 @@
+import logging
 import os
 from collections import namedtuple
 from datetime import datetime
-import logging
 from logging import StreamHandler
 
 BENCHMARK = "benchmark"
@@ -64,6 +64,7 @@ class codespeed:
         # Note: this upload all results in one request
         cli.upload_results()
 
+# Currently not used
 class CodespeedHandler(StreamHandler):
 
     def emit(self, record):
@@ -76,6 +77,7 @@ class CodespeedHandler(StreamHandler):
         except Exception as e:
             print("Can't send metric to code speed server: %s" % e)
 
+# Currently not used
 def addCodeSpeedLogger():
     try:
 
