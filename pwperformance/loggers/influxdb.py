@@ -54,7 +54,7 @@ class InfluxHandler(logging.Handler):
                  bucket = "unset",
                  org = "unset",
                  url = "http://localhost:8086",
-                 indexed_keys=None,
+                 indexed_keys=['level', 'short_message'],
                  debugging_fields=True,
                  extra_fields=True,
                  localname=None,
@@ -67,7 +67,7 @@ class InfluxHandler(logging.Handler):
         self.extra_fields = extra_fields
         self.localname = localname
         self.measurement = measurement
-        self.indexed_keys = ['level', 'short_message']
+        self.indexed_keys = indexed_keys
 
         self.bucket = bucket
         self.org = org
