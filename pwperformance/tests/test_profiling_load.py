@@ -10,6 +10,7 @@ from pwperformance.main import Timer, Benchmark, codespeed
 
 class TestProfilingLoadGUI(unittest.TestCase):
     root = tk.Tk()
+
     def createCanvas(self):
 
         canvas = pwgui.Canvas(self.root, width=800, height=800,
@@ -68,8 +69,5 @@ class TestProfilingLoadGUI(unittest.TestCase):
                                name="Load project %s with GUI with %s protocols" % (
                                projectFolder, self.numberofprotocols))
                 codespeed.sendData(bm)
-            except Exception as e:
+            except Exception:
                 print("Error loading the project %s" % projectFolder)
-
-
-

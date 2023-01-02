@@ -7,6 +7,7 @@ from logging import StreamHandler
 BENCHMARK = "benchmark"
 
 Benchmark = namedtuple('Benchmark', ['name', 'time'])
+
 def getEnv(envName, default):
     return os.environ.get(envName, default)
 
@@ -55,14 +56,15 @@ class codespeed:
         #              result_date, result_value, max, min, std_dev
 
         # kwargs passed to add_result overwrite defaults
-        cli.add_result( executable="Scipion",
-                        commitid="undefined",
-                        branch=cls._getRevision(),
-                        benchmark=benchmark.name,
-                        result_value=benchmark.time)
+        cli.add_result(executable="Scipion",
+                       commitid="undefined",
+                       branch=cls._getRevision(),
+                       benchmark=benchmark.name,
+                       result_value=benchmark.time)
 
         # Note: this upload all results in one request
         cli.upload_results()
+
 
 # Currently not used
 class CodespeedHandler(StreamHandler):
@@ -77,17 +79,18 @@ class CodespeedHandler(StreamHandler):
         except Exception as e:
             print("Can't send metric to code speed server: %s" % e)
 
+
 # Currently not used
 def addCodeSpeedLogger():
     try:
 
-        csHandler= CodespeedHandler()
+        csHandler = CodespeedHandler()
 
         logger = logging.getLogger()
         logger.addHandler(csHandler)
 
     except Exception as e:
-        print ("Can't add codeSpeed logger: %s" % e)
+        print("Can't add codeSpeed logger: %s" % e)
 
 
 class Timer(object):

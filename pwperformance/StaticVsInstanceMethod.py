@@ -1,5 +1,6 @@
 from pwperformance.main import Timer
 
+
 class Instance(object):
 
     def method1(cls): pass
@@ -102,6 +103,7 @@ class Instance(object):
 
     def method50(cls): pass
 
+
 class Static(object):
     @classmethod
     def method1(cls): pass
@@ -203,7 +205,6 @@ class Static(object):
     def method49(cls): pass
     @classmethod
     def method50(cls): pass
-
 
 
 with Timer(msg="Inst.") as t:
