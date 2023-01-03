@@ -27,7 +27,7 @@ class codespeed:
 
     @classmethod
     def _getEnvironment(cls):
-        return getEnv(cls.CODESPEED_ENV, "lvx-0855")
+        return getEnv(cls.CODESPEED_ENV, "unknown")
 
     @classmethod
     def _getProject(cls):
