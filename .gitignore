@@ -1,13 +1,16 @@
-### Python binaries
-*.pyc
-*.pyo
-
-### IDE files
+#### Eclipse and so on
+.project
+.cproject
+.pydevproject
+.classpath
 .idea
 
-
-### pip package files
-*.egg-info
-
-dist/*
-
+#### Python
+build/
+dist/
+*.egg-info/
+*.egg
+*.py[cod]
+__pycache__/
+*.so
+*~

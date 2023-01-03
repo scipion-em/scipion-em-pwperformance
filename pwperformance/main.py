@@ -4,9 +4,10 @@ from collections import namedtuple
 from datetime import datetime
 from logging import StreamHandler
 
-BENCHMARK = "benchmark"
 
+BENCHMARK = "benchmark"
 Benchmark = namedtuple('Benchmark', ['name', 'time'])
+
 
 def getEnv(envName, default):
     return os.environ.get(envName, default)
@@ -18,7 +19,7 @@ class codespeed:
     CODESPEED_URL = "CODESPEED_URL"
     CODESPEED_ENV = "CODESPEED_ENV"
     CODESPEED_PROJECT = "CODESPEED_PROJECT"
-    CODESPEED_REVISION = "CODESPEED_REVISION"
+    CODESPEED_BRANCH = "CODESPEED_BRANCH"
 
     @classmethod
     def _getHost(cls):
@@ -26,43 +27,53 @@ class codespeed:
 
     @classmethod
     def _getEnvironment(cls):
-        return getEnv(cls.CODESPEED_ENV, "undefined")
+        return getEnv(cls.CODESPEED_ENV, "lvx-0855")
 
     @classmethod
     def _getProject(cls):
-        return getEnv(cls.CODESPEED_PROJECT, "undefined")
+        return getEnv(cls.CODESPEED_PROJECT, "pyworkflow")
 
     @classmethod
-    def _getRevision(cls):
-        return getEnv(cls.CODESPEED_REVISION, "undefined")
+    def _getBranch(cls):
+        return getEnv(cls.CODESPEED_BRANCH, "devel")
 
     @classmethod
     def getCodeSpeedClient(cls):
         if cls.__client is None:
+            from .client import Client
 
-            from codespeed_client import Client
-
-            # kwargs passed to constructor are defaults
-
-            cls.__client = Client(cls._getHost(), environment=cls._getEnvironment(), project=cls._getProject())
+            cls.__client = Client(cls._getHost(),
+                                  environment=cls._getEnvironment(),
+                                  project=cls._getProject())
 
         return cls.__client
 
     @classmethod
-    def sendData(cls, benchmark):
+    def saveData(cls, instance, benchmark):
+        """ Save benchmarks to a buffer.
+        :param instance: instance of the test class (to obtain the test name used as executable)
+        :param benchmark: Benchmark to be saved
+        """
         cli = cls.getCodeSpeedClient()
 
-        # kwargs list: environment, project, benchmark, branch, commitid, revision_date, executable,
-        #              result_date, result_value, max, min, std_dev
+        # kwargs list: environment, project, benchmark, branch, commitid,
+        # revision_date, executable, result_date, result_value,
+        # max, min, std_dev
 
-        # kwargs passed to add_result overwrite defaults
-        cli.add_result(executable="Scipion",
-                       commitid="undefined",
-                       branch=cls._getRevision(),
-                       benchmark=benchmark.name,
-                       result_value=benchmark.time)
+        # get class name of a test
+        executable = type(instance).__name__
 
-        # Note: this upload all results in one request
+        cli.add_result(
+            executable=executable,
+            commitid="d5cf20796aa9c4c3c7603f7c2f2098250068e29a",
+            branch=cls._getBranch(),
+            benchmark=benchmark.name,
+            result_value=benchmark.time)
+
+    @classmethod
+    def sendData(cls):
+        """ Upload all results in one POST request. """
+        cli = cls.getCodeSpeedClient()
         cli.upload_results()
 
 
@@ -74,7 +85,8 @@ class CodespeedHandler(StreamHandler):
         try:
             benchmark = getattr(record, BENCHMARK, None)
             if benchmark is not None:
-                codespeed.sendData(benchmark)
+                codespeed.saveData(self, benchmark)
+                codespeed.sendData()
 
         except Exception as e:
             print("Can't send metric to code speed server: %s" % e)
@@ -83,9 +95,7 @@ class CodespeedHandler(StreamHandler):
 # Currently not used
 def addCodeSpeedLogger():
     try:
-
         csHandler = CodespeedHandler()
-
         logger = logging.getLogger()
         logger.addHandler(csHandler)
 
@@ -93,7 +103,7 @@ def addCodeSpeedLogger():
         print("Can't add codeSpeed logger: %s" % e)
 
 
-class Timer(object):
+class Timer:
     """ Simple Timer base in datetime.now and timedelta. """
     def __init__(self, msg=None):
         self._msg = msg
