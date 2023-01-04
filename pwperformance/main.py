@@ -20,6 +20,7 @@ class codespeed:
     CODESPEED_ENV = "CODESPEED_ENV"
     CODESPEED_PROJECT = "CODESPEED_PROJECT"
     CODESPEED_BRANCH = "CODESPEED_BRANCH"
+    CODESPEED_COMMIT = "CODESPEED_COMMIT"
 
     @classmethod
     def _getHost(cls):
@@ -36,6 +37,10 @@ class codespeed:
     @classmethod
     def _getBranch(cls):
         return getEnv(cls.CODESPEED_BRANCH, "devel")
+
+    @classmethod
+    def _getCommitId(cls):
+        return getEnv(cls.CODESPEED_COMMIT, "1")
 
     @classmethod
     def getCodeSpeedClient(cls):
@@ -65,7 +70,7 @@ class codespeed:
 
         cli.add_result(
             executable=executable,
-            commitid="d5cf20796aa9c4c3c7603f7c2f2098250068e29a",
+            commitid=cls._getCommitId(),
             branch=cls._getBranch(),
             benchmark=benchmark.name,
             result_value=benchmark.time)

@@ -19,10 +19,11 @@ Define the following environment vars:
 
 .. code-block::
 
-    CODESPEED_URL = Codespeed url to send benchmarks to. Defaults to "http://localhost:8000"
-    CODESPEED_ENV = Codespeed environment. Defaults to unknown
-    CODESPEED_PROJECT = Codespeed project. Defaults to "pyworkflow"
-    CODESPEED_BRANCH = Codespeed branch. Defaults to "devel"
+    CODESPEED_URL = Codespeed server URL to send benchmarks to. Defaults to "http://localhost:8000"
+    CODESPEED_ENV = Environment name. Environment describes your testing PC configuration. Defaults to "unknown"
+    CODESPEED_PROJECT = This should be the plugin you want to test. Defaults to "pyworkflow"
+    CODESPEED_BRANCH = Git branch of your project. Defaults to "devel"
+    CODESPEED_COMMIT = Git commit id of your project. Defaults to "1"
 
 Codespeed server installation
 -----------------------------
@@ -39,7 +40,7 @@ Codespeed server installation
     #. python manage.py runserver 8000
     #. Go to http://localhost:8000/admin
         #. create an environment (your CODESPEED_ENV)
-        #. create a Github-type project (name = CODESPEED_PROJECT) with a correct url (e.g. https://github.com/scipion-em/scipion-pyworkflow), branch ("devel" or your own CODESPEED_BRANCH) and tick "Track changes"
+        #. create a Github-type project (name = CODESPEED_PROJECT) with a correct url (e.g. https://github.com/scipion-em/scipion-pyworkflow), branch (e.g. "devel" or your own CODESPEED_BRANCH) and tick "Track changes"
         #. create a "devel" (or your own CODESPEED_BRANCH) branch
 
 Example run
