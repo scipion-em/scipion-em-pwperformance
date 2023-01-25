@@ -1,3 +1,2 @@
 scipion-pyworkflow
-codespeed-client
 influxdb-client

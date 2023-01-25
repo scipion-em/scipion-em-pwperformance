@@ -50,10 +50,10 @@ class InfluxHandler(logging.Handler):
     """
 
     def __init__(self,
-                 token = "unset",
-                 bucket = "unset",
-                 org = "unset",
-                 url = "http://localhost:8086",
+                 token="unset",
+                 bucket="unset",
+                 org="unset",
+                 url="http://localhost:8086",
                  indexed_keys=['level', 'short_message'],
                  debugging_fields=True,
                  extra_fields=True,

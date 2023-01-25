@@ -10,8 +10,8 @@ from pwperformance.main import Timer, Benchmark, codespeed
 
 class TestProfilingLoadGUI(unittest.TestCase):
     root = tk.Tk()
-    def createCanvas(self):
 
+    def createCanvas(self):
         canvas = pwgui.Canvas(self.root, width=800, height=800,
                               tooltipDelay=1000,
                               name="runs_canvas",
@@ -42,11 +42,14 @@ class TestProfilingLoadGUI(unittest.TestCase):
         return runsGraph
 
     def findProjects(self):
-        self.projectsPath = os.environ.get("PROFILING_PROJECTS_PATH", "/home/yunior/profilingProjects/")
+        self.projectsPath = os.path.join(pw.Config.SCIPION_USER_DATA, "projects")
+        projects = []
 
-        if self.projectsPath is not None:
-            for base, dirs, files in os.walk(self.projectsPath):
-                return dirs
+        for item in os.listdir(self.projectsPath):
+            if os.path.isdir(os.path.join(self.projectsPath, item)):
+                projects.append(item)
+
+        return projects
 
     def testLoadProjectGUI(self):
         t = Timer()
@@ -67,9 +70,8 @@ class TestProfilingLoadGUI(unittest.TestCase):
                 bm = Benchmark(time=loadProjectTime.total_seconds(),
                                name="Load project %s with GUI with %s protocols" % (
                                projectFolder, self.numberofprotocols))
-                codespeed.sendData(bm)
-            except Exception as e:
+                codespeed.saveData(self, bm)
+            except Exception:
                 print("Error loading the project %s" % projectFolder)
 
-
-
+        codespeed.sendData()

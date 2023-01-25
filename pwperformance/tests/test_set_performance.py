@@ -1,15 +1,11 @@
-import sys
-
-
-# Initialize scipion environment
 import tempfile
 import unittest
-
-from pwperformance.main import Timer, Benchmark, BENCHMARK, codespeed
-from pwem.objects import SetOfCoordinates, Coordinate, SetOfParticles, Integer, Particle, Acquisition, Micrograph, Movie
 import os
-from  datetime import timedelta
+from datetime import timedelta
 
+from pwperformance.main import Timer, Benchmark, codespeed
+from pwem.objects import (SetOfCoordinates, Coordinate, SetOfParticles, Integer,
+                          Particle, Acquisition, Micrograph, Movie)
 from pyworkflow.tests import DataSet
 
 
@@ -33,11 +29,12 @@ class TestSetPerformanceSteps(unittest.TestCase):
         return newCoord
 
     def testBasicCoordinatesSet(self):
-
-        measureSetPerformance(SetOfCoordinates, self.basiccoordsFactory, "basic-coords")
+        res = measureSetPerformance(SetOfCoordinates, self.basiccoordsFactory, "basic-coords")
+        for r in res:
+            codespeed.saveData(self, r)
+        codespeed.sendData()
 
     def testExtendedCoordinatesSet(self):
-
         def coordsFactory(iteration):
             # newCoord =  Coordinate(x=i, y=i)
             # To avoid dict get
@@ -57,10 +54,12 @@ class TestSetPerformanceSteps(unittest.TestCase):
 
             return newCoord
 
-        measureSetPerformance(SetOfCoordinates, coordsFactory, "extended-10-coords")
+        res = measureSetPerformance(SetOfCoordinates, coordsFactory, "extended-10-coords")
+        for r in res:
+            codespeed.saveData(self, r)
+        codespeed.sendData()
 
     def testSuperExtendedCoordinatesSet(self):
-
         def coordsFactory(iteration):
             # newCoord =  Coordinate(x=i, y=i)
             # To avoid dict get
@@ -89,71 +88,87 @@ class TestSetPerformanceSteps(unittest.TestCase):
             newCoord.extra19 = Integer(1)
             newCoord.extra20 = Integer(1)
 
-
             return newCoord
 
-        measureSetPerformance(SetOfCoordinates, coordsFactory, "extended-20-coords", numberofitems=10**6)
+        res = measureSetPerformance(SetOfCoordinates, coordsFactory,
+                              "extended-20-coords", numberofitems=10 ** 6)
+        for r in res:
+            codespeed.saveData(self, r)
+        codespeed.sendData()
 
     def testBasicMicsSetPerformance(self):
-
         def micsFactory(index):
             newMic = Micrograph(location=self.mic1)
             return newMic
 
-        measureSetPerformance(SetOfParticles, micsFactory, "basic mics")
-
+        res = measureSetPerformance(SetOfParticles, micsFactory, "basic mics")
+        for r in res:
+            codespeed.saveData(self, r)
+        codespeed.sendData()
 
     def testBasicMoviesSetPerformance(self):
-
         def moviesFactory(index):
             newMovie = Movie(location=self.movieFn)
             return newMovie
 
-        measureSetPerformance(SetOfParticles, moviesFactory, "basic movies")
-
+        res = measureSetPerformance(SetOfParticles, moviesFactory, "basic movies")
+        for r in res:
+            codespeed.saveData(self, r)
+        codespeed.sendData()
 
     def testBasicParticlesSetPerformance(self):
-
         def particlesFactory(index):
-            newParticle = Particle(location=(1,self.particlesStk))
+            newParticle = Particle(location=(1, self.particlesStk))
             return newParticle
 
-        measureSetPerformance(SetOfParticles, particlesFactory, "basic particles")
-
+        res = measureSetPerformance(SetOfParticles, particlesFactory, "basic particles")
+        for r in res:
+            codespeed.saveData(self, r)
+        codespeed.sendData()
 
     def testComplexParticlesSetPerformance(self):
-
         def particlesFactory(index):
-            newParticle = Particle(location=(1,self.particlesStk))
-            newParticle.setCoordinate(Coordinate(x=1,y=2))
+            newParticle = Particle(location=(1, self.particlesStk))
+            newParticle.setCoordinate(Coordinate(x=1, y=2))
             newParticle.setAcquisition(Acquisition())
             return newParticle
 
-        measureSetPerformance(SetOfParticles, particlesFactory, "complex particles")
+        res = measureSetPerformance(SetOfParticles, particlesFactory, "complex particles")
+        for r in res:
+            codespeed.saveData(self, r)
+        codespeed.sendData()
 
     def testUsingGet(self):
         """ This benchmarks the time accessing an item as a dictionary, like set[id]."""
         items = 100
         soc = createSet(SetOfCoordinates)
-        createItems(soc, self.basiccoordsFactory, numberofitems=items)
+        results = createItems(soc, self.basiccoordsFactory, numberofitems=items)
         t = Timer("A %s Set.__item__ calls" % items)
         t.tic()
-        for id in range(1,items+1):
+        for id in range(1, items + 1):
             soc[id]
         t.toc()
         bm = Benchmark(time=t.getElapsedTime().total_seconds(),
                        name="A %s Set.__item__ calls" % items)
 
-        codespeed.sendData(bm)
+        results.append(bm)
+        for r in results:
+            codespeed.saveData(self, r)
+        codespeed.sendData()
+
 
 def measureSetPerformance(setClass, itemFactory, performanceTag, numberofitems=100000):
-    """ Measures instantiation, persistence and iteration of a set, sending data to a codespeed benchmark server"""
+    """ Measures instantiation, persistence and iteration of a set,
+    sending data to a codespeed benchmark server"""
 
     newSet = createSet(setClass)
 
-    createItems(newSet, itemFactory, numberofitems=numberofitems, performanceTag=performanceTag)
+    results = createItems(newSet, itemFactory, numberofitems=numberofitems, performanceTag=performanceTag)
 
-    measureSetIteration(newSet, performanceTag)
+    bm = measureSetIteration(newSet, performanceTag)
+    results.append(bm)
+
+    return results
 
 
 def createItems(set, itemfactory, numberofitems=100000, performanceTag=None):
@@ -162,6 +177,8 @@ def createItems(set, itemfactory, numberofitems=100000, performanceTag=None):
     :parameter set: Set instance to be used
     :parameter itemfactory: method to call to create a specific item. Receives the index of the iteration
     :parameter performanceTag: tag to use to create the benchmark name"""
+
+    results = []
 
     # To hold sum elapsed time
     creation = timedelta()
@@ -179,24 +196,25 @@ def createItems(set, itemfactory, numberofitems=100000, performanceTag=None):
     set.write()
 
     if performanceTag:
-
         bm = Benchmark(time=creation.total_seconds(),
                        name="Instantiation of %s %s" % (numberofitems, performanceTag))
-
-        codespeed.sendData(bm)
+        results.append(bm)
 
         bm = Benchmark(time=append.total_seconds(),
                        name="Persistence of %s %s" % (numberofitems, performanceTag))
+        results.append(bm)
 
-        codespeed.sendData(bm)
+        bm = measureSetIteration(set, performanceTag)
+        results.append(bm)
 
-        measureSetIteration(set, performanceTag)
+    return results
+
 
 def createSet(setClass):
     """ Create a set based on the setClass in the system temporary folder"""
 
     tmpFolder = tempfile.gettempdir()
-    setFile = str(setClass.__name__) +  "%s.sqlite"
+    setFile = str(setClass.__name__) + "%s.sqlite"
     sqliteFile = os.path.join(tmpFolder, setFile % "")
 
     if os.path.exists(sqliteFile):
@@ -207,7 +225,7 @@ def createSet(setClass):
 
 def measureSetIteration(set, performanceTag):
     """ Measures the time  taken to iterate over the set passed.
-    :parameter set set to iterate on
+    :parameter set to iterate on
     :parameter performanceTag: text to name the benchmark"""
 
     iterT = Timer()
@@ -217,4 +235,5 @@ def measureSetIteration(set, performanceTag):
     iterT.toc()
     bm = Benchmark(time=iterT.getElapsedTime().total_seconds(),
                    name="Iteration-%s" % performanceTag)
-    codespeed.sendData(bm)
+
+    return bm
